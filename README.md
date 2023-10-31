@@ -1,2 +1,2 @@
-# PathEditor
+# 3d-bezier-curve-editor
 Created with CodeSandbox
