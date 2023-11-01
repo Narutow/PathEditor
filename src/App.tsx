@@ -3,6 +3,8 @@ import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei/core"
 import { BezierCurveEditor } from "./components/BezierCurveEditor"
 import { UI } from "./components/UI/UI"
+import { Vector3 } from "three"
+import SeatSphereContainer from "./components/SeatSphereContainer"
 
 export default function App() {
   return (
@@ -11,11 +13,11 @@ export default function App() {
         <UI />
       </div>
       <Canvas
-        style={{ background: "#000" }}
+        style={{ background: "#888" }}
         id="canvas"
         dpr={window.devicePixelRatio}
         camera={{
-          position: [0, 5, 15],
+          position: new Vector3(0, 5, 15),
           near: 0.01,
           far: 100,
           fov: 45,
@@ -23,8 +25,9 @@ export default function App() {
       >
         <BezierCurveEditor />
         <ambientLight intensity={2} />
-        <gridHelper args={[20, 20]} />
+        <gridHelper args={[20, 20, "#FFF", "#CCC"]} />
         <OrbitControls makeDefault />
+        <SeatSphereContainer />
       </Canvas>
     </div>
   )

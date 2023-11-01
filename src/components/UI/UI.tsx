@@ -18,19 +18,19 @@ export const UI = () => {
   return (
     <div className="ui-content">
       <button className="button" onClick={addRandomSegment}>
-        Add Random Point
+        随机添加曲线
       </button>
       <button className="button" onClick={removeSegments}>
-        Clear All
+        清除全部
       </button>
       <button className="button" onClick={onCurveExport}>
-        Export Curve
+        导出参数
       </button>
       <button className="button" onClick={() => setPlayAnimation(true)}>
-        Play
+        播放动画
       </button>
       <button className="button" onClick={() => setPlayAnimation(false)}>
-        Pause
+        暂停动画
       </button>
     </div>
   )
