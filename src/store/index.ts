@@ -9,6 +9,7 @@ interface SegmentsState {
   addRandomSegment: () => void
   removeSegments: () => void
   setPlayAnimation: (v: boolean) => void
+  addSegment: (segment: ControlPoints) => void
 }
 
 export const useStore = create<SegmentsState>((set) => ({
@@ -45,4 +46,10 @@ export const useStore = create<SegmentsState>((set) => ({
     }),
   removeSegments: () => set({ segments: [] }),
   setPlayAnimation: (v: boolean) => set({ playAnimation: v }),
+  addSegment: (segment: ControlPoints) =>
+    set((state) => {
+      const newSegments = [...state.segments];
+      newSegments.push(segment);
+      return { segments: newSegments };
+    }),
 }))
