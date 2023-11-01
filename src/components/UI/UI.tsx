@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react"
 import { useStore } from "../../store"
 import { Vector3Tuple } from "three"
+import { ControlPoints } from "../../types"
 
 export const UI = () => {
   const segments = useStore((state) => state.segments)
@@ -34,7 +35,7 @@ export const UI = () => {
     }    
     return {success, result};
   }
-  
+
 
   const tryAddSegment = () => {
     const parsedStartData = parseInput(start);
@@ -98,6 +99,51 @@ export const UI = () => {
       <button className="button" onClick={tryAddSegment}>
         添加轨迹
       </button>
-    </div>
+          </div>
   )
+}
+
+type CurveProps = {
+  controlPoints: ControlPoints,
+};
+
+function CurveItem(props: CurveProps) {
+  const { startPoint, endPoint, midPointA, midPointB } = props.controlPoints;
+  
+  const startPointStr = startPoint.map(val => val.toFixed(2)).join(', ');
+  const controlAPointStr = midPointA.map(val => val.toFixed(2)).join(', ');
+  const controlBPointStr = midPointB.map(val => val.toFixed(2)).join(', ');
+  const endPointStr = endPoint.map(val => val.toFixed(2)).join(', ');
+
+  const removeSegment = useStore((state) => state.removeSegment)
+
+  return (
+    <div className="curve-item-container">
+      <div className="points-container">
+        <div className="points-row">
+          <text className="point-text">S:{startPointStr}</text>
+          <div style={{width: "10px"}}/>
+          <text className="point-text">E:{endPointStr}</text>
+        </div>
+        <div className="points-row">
+          <text className="point-text">A:{controlAPointStr}</text>
+          <div style={{width: "10px"}}/>
+          <text className="point-text">B:{controlBPointStr}</text>
+        </div>
+      </div>
+      <button className="button" onClick={() => removeSegment(props.controlPoints)}>删除</button>
+    </div>
+  );
+}
+
+export function CurveList() {
+  const segments = useStore((state) => state.segments);
+
+  return (
+    <div className="curve-list-container">
+    {segments && segments.map((value: ControlPoints, index: number) => {
+      return <CurveItem controlPoints={value} key={index} />
+    })}
+    </div>
+  );
 }

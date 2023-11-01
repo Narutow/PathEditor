@@ -56,3 +56,38 @@ body {
   background: grey;
   cursor: pointer;
 }
+
+.curve-list-container {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  pointer-events: all;
+}
+
+.curve-item-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.points-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.points-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.point-text {
+  font-size: 10px;
+}

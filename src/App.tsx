@@ -2,7 +2,7 @@ import "./styles.css"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei/core"
 import { BezierCurveEditor } from "./components/BezierCurveEditor"
-import { UI } from "./components/UI/UI"
+import { CurveList, UI } from "./components/UI/UI"
 import { Vector3 } from "three"
 import SeatSphereContainer from "./components/SeatSphereContainer"
 
@@ -11,6 +11,7 @@ export default function App() {
     <div className="App" id="container">
       <div className="ui-container">
         <UI />
+        <CurveList />
       </div>
       <Canvas
         style={{ background: "#888" }}

@@ -1,5 +1,5 @@
 import create from "zustand"
-import { ControlPoints } from "../types"
+import { ControlPoints, removeElement } from "../types"
 import { getRandomPoint } from "../utils/helpers"
 
 interface SegmentsState {
@@ -10,6 +10,7 @@ interface SegmentsState {
   removeSegments: () => void
   setPlayAnimation: (v: boolean) => void
   addSegment: (segment: ControlPoints) => void
+  removeSegment: (segment: ControlPoints) => void
 }
 
 export const useStore = create<SegmentsState>((set) => ({
@@ -51,5 +52,10 @@ export const useStore = create<SegmentsState>((set) => ({
       const newSegments = [...state.segments];
       newSegments.push(segment);
       return { segments: newSegments };
+    }),
+  removeSegment: (segment: ControlPoints) =>
+    set((state) => {
+      const newSegments = removeElement(state.segments, segment);
+      return { segments: newSegments }
     }),
 }))
