@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, Fragment, useEffect } from "react"
 import { TransformControls } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
-import { Object3D } from "three"
+import { Mesh, Object3D } from "three"
 import { updateCurve } from "../utils/helpers"
 import { BezierLineSegment } from "./BezierLineSegment"
 import { ControlPoint } from "./ControlPoint"
@@ -23,7 +23,7 @@ export const BezierCurveEditor = () => {
   const selectedControlPointRef = useRef<Object3D | null>()
   const newControlPoints = useRef<ControlPoints | null>(null)
   const prevSegmentControlPoints = useRef<ControlPoints | null>(null)
-  const testObj = useRef<Object3D>()
+  const testObj = useRef<Mesh>()
 
   useAnimation(testObj)
 
@@ -134,8 +134,8 @@ export const BezierCurveEditor = () => {
         ref={testObj}
         position={segments[0] ? [...segments[0].startPoint] : [0, 0, 0]}
       >
-        <sphereBufferGeometry args={[0.2, 32]} />
-        <meshBasicMaterial color="yellow" />
+        <sphereBufferGeometry args={[0.5, 32]} />
+        <meshBasicMaterial color="white" />
       </mesh>
     </>
   )

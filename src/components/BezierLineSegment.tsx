@@ -3,7 +3,7 @@ import { ControlPoints } from "../types"
 
 const lineProps = {
   lineWidth: 0.7,
-  color: "#fa00a0",
+  color: 1.0,
 }
 
 export const BezierLineSegment = ({
