@@ -3,13 +3,16 @@ import { MutableRefObject, useEffect, useMemo, useState } from "react"
 import { Object3D } from "three"
 import { useStore } from "../store"
 import { getCubicBezierPoint } from "../utils/interpolation"
+import { addVector, cloneControlPoints, subtractVector } from "../types"
 
 export const useAnimation = (
   object: MutableRefObject<Object3D | undefined>
 ) => {
   const [objectLoading, setObjectLoading] = useState(true)
-  const segments = useStore((state) => state.segments)
+  const viewSegments = useStore((state) => state.viewSegments)
+  const micseats = useStore((state) => state.micseats)
   const playAnimation = useStore((state) => state.playAnimation)
+  const relativePointIndex = useStore((state) => state.relativePointIndex)
 
   useEffect(() => {
     if (object.current) setObjectLoading(false)
@@ -19,7 +22,7 @@ export const useAnimation = (
     () =>
       gsap.timeline({
         repeat: -1,
-        defaults: { duration: 3, ease: "ease" },
+        defaults: { duration: 2, ease: "ease" },
       }),
     []
   )
@@ -27,11 +30,12 @@ export const useAnimation = (
   useEffect(() => {
     if (!object.current || objectLoading || !timeline) return
     timeline.clear()
-    segments.forEach((controlPoints) => {
+    viewSegments.forEach((controlPoints) => {
       if (!object.current) return
       timeline.to(
         object.current.position,
         {
+          duration: controlPoints.pathExtra?.duration || 2,
           x: controlPoints.endPoint[0],
           y: controlPoints.endPoint[1],
           z: controlPoints.endPoint[2],
@@ -52,7 +56,7 @@ export const useAnimation = (
         ">"
       )
     })
-  }, [object, segments, objectLoading, timeline])
+  }, [object, viewSegments, objectLoading, timeline, relativePointIndex])
 
   useEffect(() => {
     if (playAnimation) {

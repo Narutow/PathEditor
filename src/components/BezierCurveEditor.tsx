@@ -11,7 +11,7 @@ import { useAnimation } from "./useAnimation"
 
 export const BezierCurveEditor = () => {
   const { scene } = useThree()
-  const segments = useStore((state) => state.segments)
+  const viewSegments = useStore((state) => state.viewSegments)
   const updateSegment = useStore((state) => state.updateSegment)
   const [
     selectedControlPoint,
@@ -48,7 +48,7 @@ export const BezierCurveEditor = () => {
       selectedControlPointRef.current
     ) {
       newControlPoints.current = {
-        ...segments[selectedSegment],
+        ...viewSegments[selectedSegment],
         [selectedControlPoint]: selectedControlPointRef.current.position.toArray(),
       }
       if (selectedCurve.current && newControlPoints.current) {
@@ -56,7 +56,7 @@ export const BezierCurveEditor = () => {
       }
       if (prevSegmentCurve.current) {
         prevSegmentControlPoints.current = {
-          ...segments[selectedSegment - 1],
+          ...viewSegments[selectedSegment - 1],
           endPoint: selectedControlPointRef.current.position.toArray(),
         }
         if (prevSegmentControlPoints.current) {
@@ -64,7 +64,7 @@ export const BezierCurveEditor = () => {
         }
       }
     }
-  }, [segments, selectedControlPoint, selectedSegment])
+  }, [viewSegments, selectedControlPoint, selectedSegment])
 
   const onTransformEnd = useCallback(() => {
     if (newControlPoints.current && selectedSegment !== null) {
@@ -87,19 +87,19 @@ export const BezierCurveEditor = () => {
   }, [])
 
   useEffect(() => {
-    if (segments.length < 1) deselect()
-  }, [segments, deselect])
+    if (viewSegments.length < 1) deselect()
+  }, [viewSegments, deselect])
 
   return (
     <>
-      {segments.map((segment: ControlPoints, segmentIndex: number) => (
+      {viewSegments.map((segment: ControlPoints, segmentIndex: number) => (
         <group key={segmentIndex}>
           <BezierLineSegment segmentName={segmentIndex} segment={segment} />
           {Object.keys(segment).map((controlPoint) => {
             const identificationName = `${segmentIndex}-${controlPoint}`
             return (
               <Fragment key={identificationName}>
-                {(segmentIndex + 1 === segments.length ||
+                {(segmentIndex + 1 === viewSegments.length ||
                   controlPoint !== "endPoint") && (
                   <ControlPoint
                     idName={identificationName}
@@ -117,7 +117,7 @@ export const BezierCurveEditor = () => {
           })}
         </group>
       ))}
-      {selectedControlPoint && segments.length > 0 && (
+      {selectedControlPoint && viewSegments.length > 0 && (
         <TransformControls
           object={scene.getObjectByName(
             `${selectedSegment}-${selectedControlPoint}`
@@ -132,7 +132,7 @@ export const BezierCurveEditor = () => {
       )}
       <mesh
         ref={testObj}
-        position={segments[0] ? [...segments[0].startPoint] : [0, 0, 0]}
+        position={viewSegments[0] ? [...viewSegments[0].startPoint] : [0, 0, 0]}
       >
         <sphereBufferGeometry args={[0.5, 32]} />
         <meshBasicMaterial color="white" />

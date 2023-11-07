@@ -1,6 +1,6 @@
-import { useTexture } from "@react-three/drei";
 import { useEffect, useState } from "react";
 import { DoubleSide, TextureLoader, Vector3 } from "three";
+import { useStore } from "../store";
 
 export default function SeatSphereContainer() {
 
@@ -15,18 +15,8 @@ export default function SeatSphereContainer() {
     );
   }
 
-  const spherePositions: Array<Vector3> = [
-    new Vector3(0, 4.9, 0),
-    new Vector3(-3.35, 2.1, 0),
-    new Vector3(-1.2, 2.1, 0),
-    new Vector3(1.2, 2.1, 0),
-    new Vector3(3.35, 2.1, 0),
-    new Vector3(-3.35, -0.35, 0),
-    new Vector3(-1.2, -0.35, 0),
-    new Vector3(1.2, -0.35, 0),
-    new Vector3(3.35, -0.35, 0),
-  ];
-
+  const micseats = useStore((state) => state.micseats)
+  
   const [texture, setTexture] = useState(null)
   
   useEffect(() => {
@@ -50,15 +40,16 @@ export default function SeatSphereContainer() {
         <planeGeometry args={[10, 20]} />
         <meshStandardMaterial map={texture} side={DoubleSide} opacity={0.5} transparent />
       </mesh>
-      {seatSphere(spherePositions[0], 0.9)}
-      {seatSphere(spherePositions[1], 0.7)}
-      {seatSphere(spherePositions[2], 0.7)}
-      {seatSphere(spherePositions[3], 0.7)}
-      {seatSphere(spherePositions[4], 0.7)}
-      {seatSphere(spherePositions[5], 0.7)}
-      {seatSphere(spherePositions[6], 0.7)}
-      {seatSphere(spherePositions[7], 0.7)}
-      {seatSphere(spherePositions[8], 0.7)}
+      
+      {seatSphere(micseats[0], 0.9)}
+      {seatSphere(micseats[1], 0.7)}
+      {seatSphere(micseats[2], 0.7)}
+      {seatSphere(micseats[3], 0.7)}
+      {seatSphere(micseats[4], 0.7)}
+      {seatSphere(micseats[5], 0.7)}
+      {seatSphere(micseats[6], 0.7)}
+      {seatSphere(micseats[7], 0.7)}
+      {seatSphere(micseats[8], 0.7)}
     </>
   );
 }
