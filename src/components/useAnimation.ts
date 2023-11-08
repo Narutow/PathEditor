@@ -3,14 +3,12 @@ import { MutableRefObject, useEffect, useMemo, useState } from "react"
 import { Object3D } from "three"
 import { useStore } from "../store"
 import { getCubicBezierPoint } from "../utils/interpolation"
-import { addVector, cloneControlPoints, subtractVector } from "../types"
 
 export const useAnimation = (
   object: MutableRefObject<Object3D | undefined>
 ) => {
   const [objectLoading, setObjectLoading] = useState(true)
   const viewSegments = useStore((state) => state.viewSegments)
-  const micseats = useStore((state) => state.micseats)
   const playAnimation = useStore((state) => state.playAnimation)
   const relativePointIndex = useStore((state) => state.relativePointIndex)
 

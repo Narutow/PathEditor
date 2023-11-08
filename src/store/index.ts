@@ -1,6 +1,5 @@
 import create from "zustand"
 import { ControlPoints, generateAbsoluteControlPoints, cloneControlPointsArray, convertRelativeControlPointsArray, removeElement, convertToRelativeControlPoints, smoothControlPoints, convertToRelativeControlPointsArray } from "../types"
-import { getRandomPoint } from "../utils/helpers"
 import { Vector3 } from "three"
 
 /**

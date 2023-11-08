@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, Fragment, useEffect } from "react"
 import { TransformControls } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
 import { Mesh, Object3D } from "three"
-import { updateCurve } from "../utils/helpers"
+import { updateControlLine, updateCurve } from "../utils/helpers"
 import { BezierLineSegment } from "./BezierLineSegment"
 import { ControlPoint } from "./ControlPoint"
 import { ControlPointName, ControlPoints } from "../types"
@@ -20,6 +20,13 @@ export const BezierCurveEditor = () => {
   const [selectedSegment, setSelectedSegment] = useState<number | null>(null)
   const selectedCurve = useRef<Object3D | null>()
   const prevSegmentCurve = useRef<Object3D | null>()
+
+  // 更新控制Bar和控制线
+  const selectedControlLineA = useRef<Object3D | null>();
+  const selectedControlLineB = useRef<Object3D | null>();
+  const preControlLineA = useRef<Object3D | null>();
+  const preControlLineB = useRef<Object3D | null>();
+
   const selectedControlPointRef = useRef<Object3D | null>()
   const newControlPoints = useRef<ControlPoints | null>(null)
   const prevSegmentControlPoints = useRef<ControlPoints | null>(null)
@@ -33,10 +40,12 @@ export const BezierCurveEditor = () => {
       setSelectedControlPoint(name)
       selectedControlPointRef.current = scene.getObjectByName(idName)
       selectedCurve.current = scene.getObjectByName(segmentIndex.toString())
-      prevSegmentCurve.current =
-        name === "startPoint"
-          ? scene.getObjectByName((segmentIndex - 1).toString())
-          : null
+      prevSegmentCurve.current = name === "startPoint" ? scene.getObjectByName((segmentIndex - 1).toString()) : null;
+      
+      selectedControlLineA.current = scene.getObjectByName(`${segmentIndex.toString()}-startPoint-midPointA`);
+      selectedControlLineB.current = scene.getObjectByName(`${segmentIndex.toString()}-endPoint-midPointB`);
+      preControlLineA.current = name === "startPoint" ? scene.getObjectByName(`${(segmentIndex - 1).toString()}-startPoint-midPointA`) : null;
+      preControlLineB.current = name === "startPoint" ? scene.getObjectByName(`${(segmentIndex - 1).toString()}-endPoint-midPointB`) : null;
     },
     [scene]
   )
@@ -52,7 +61,8 @@ export const BezierCurveEditor = () => {
         [selectedControlPoint]: selectedControlPointRef.current.position.toArray(),
       }
       if (selectedCurve.current && newControlPoints.current) {
-        updateCurve(newControlPoints.current, selectedCurve)
+        updateCurve(newControlPoints.current, selectedCurve);
+        updateControlLine(newControlPoints.current, selectedControlLineA, selectedControlLineB);
       }
       if (prevSegmentCurve.current) {
         prevSegmentControlPoints.current = {
@@ -60,7 +70,8 @@ export const BezierCurveEditor = () => {
           endPoint: selectedControlPointRef.current.position.toArray(),
         }
         if (prevSegmentControlPoints.current) {
-          updateCurve(prevSegmentControlPoints.current, prevSegmentCurve)
+          updateCurve(prevSegmentControlPoints.current, prevSegmentCurve);
+          updateControlLine(prevSegmentControlPoints.current, preControlLineA, preControlLineB);
         }
       }
     }
@@ -72,10 +83,17 @@ export const BezierCurveEditor = () => {
       newControlPoints.current = null
       selectedCurve.current = null
       selectedControlPointRef.current = null
+
+      selectedControlLineA.current = null;
+      selectedControlLineB.current = null;
+
       if (prevSegmentCurve.current && prevSegmentControlPoints.current) {
         updateSegment(selectedSegment - 1, prevSegmentControlPoints.current)
         prevSegmentControlPoints.current = null
         prevSegmentCurve.current = null
+
+        preControlLineA.current = null;
+        preControlLineB.current = null;
       }
     }
     if (testObj.current) testObj.current.visible = true

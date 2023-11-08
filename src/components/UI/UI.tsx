@@ -1,6 +1,5 @@
-import { InputHTMLAttributes, useCallback, useRef, useState } from "react"
+import { InputHTMLAttributes, useCallback, useRef } from "react"
 import { useStore } from "../../store"
-import { Vector3Tuple } from "three"
 import { ControlPoints } from "../../types"
 import { Radio, RadioChangeEvent } from "antd"
 
@@ -9,87 +8,22 @@ export const UI = () => {
   const addRandomSegment = useStore((state) => state.addRandomSegment)
   const removeSegments = useStore((state) => state.removeSegments)
   const setPlayAnimation = useStore((state) => state.setPlayAnimation)
-  const addSegment = useStore((state) => state.addSegment);
   const relativePointIndex = useStore((state) => state.relativePointIndex);
   const setRelativePointIndex = useStore((state) => state.setRelativePointIndex);
-
-  // 定义四个input框的状态数据
-  const [start, setStart] = useState('');
-  const [controlA, setControlA] = useState('');
-  const [controlB, setControlB] = useState('');
-  const [end, setEnd] = useState('');
-  const onInputChanged = (type: string, value: string) => {
-    if (type === 'Start') {
-      setStart(value);
-    } else if (type === 'ControlA') {
-      setControlA(value);
-    } else if (type === 'ControlB') {
-      setControlB(value);
-    } else if (type === 'End') {
-      setEnd(value);
-    }
-  }
-
-  function parseInput(input: string): {success: boolean, result: number[]} {
-    const result = input.split(',').map(s => parseFloat(s.trim()));
-    let success = true;
-    if (result.some(isNaN)) {
-      success = false;
-    }    
-    return {success, result};
-  }
 
   const onRadioChanged = (e: RadioChangeEvent) => {
     console.log('radio checked, set relative micseat index: ', e.target.value);
     setRelativePointIndex(e.target.value);
   };
 
-  const tryAddSegment = () => {
-    const parsedStartData = parseInput(start);
-    const parsedControlAData = parseInput(controlA);
-    const parsedControlBData = parseInput(controlB);
-    const parsedEndData = parseInput(end);
-    if (!parsedStartData.success) {
-      alert('请检查起始点数据输入格式,是\"1.0, 2, 3.5\"这种形式的数据');
-      return;
-    }
-    if (!parsedControlAData.success) {
-      alert('请检查控制点A数据输入格式,是\"1.0, 2, 3.5\"这种形式的数据');
-      return;
-    }
-    if (!parsedControlBData.success) {
-      alert('请检查控制点B数据输入格式,是\"1.0, 2, 3.5\"这种形式的数据');
-      return;
-    }
-    if (!parsedEndData.success) {
-      alert('请检查结束点数据输入格式,是\"1.0, 2, 3.5\"这种形式的数据');
-      return;
-    }
-    // 添加一个轨迹,需要标识是世界坐标还是相对坐标
-    const relativeChecked = (relativeCheckBoxRef?.current as InputHTMLAttributes<HTMLInputElement>)?.checked;
-    const relativeNumber = (relativeNumberRef?.current as InputHTMLAttributes<HTMLInputElement>)?.value ?? 0;
-    const duration = (durationInputRef?.current as InputHTMLAttributes<HTMLInputElement>)?.value;
-    console.log('添加一个相对:' + relativeNumber + '号,是否相对:' + relativeChecked + '.时长:' + duration + '秒');
-    const pathExtra = {
-      duration: duration as number,
-      isRelative: relativeChecked,
-    };
-    const controlPoints = {
-      startPoint: parsedStartData.result as Vector3Tuple,
-      endPoint: parsedEndData.result as Vector3Tuple,
-      midPointA: parsedControlAData.result as Vector3Tuple,
-      midPointB: parsedControlBData.result as Vector3Tuple,
-      pathExtra
-    };
-    addSegment(controlPoints);
-  }
-
-  const onCurveExport = useCallback(() => {
-    let str = ""
+  const onCurveExport = useCallback(async () => {
+    let str = "";
     segments.forEach((controlPoints) => {
-      str += `B(t) = (1-t)³(${controlPoints.startPoint}) + 3(1 - t)²t(${controlPoints.midPointA}) + 3(1 - t)t²(${controlPoints.midPointB}) + t³(${controlPoints.endPoint}); \n`
-    })
-    alert(str)
+      str += `S:(${controlPoints.startPoint}). A:(${controlPoints.midPointA}). B:(${controlPoints.midPointB}), E:(${controlPoints.endPoint}), R:(${controlPoints.pathExtra?.isRelative}), D:(${controlPoints.pathExtra?.duration}) \n\n`
+    });
+    
+    await navigator.clipboard.writeText(str)
+    alert('已复制如下内容到剪贴板:\n' + str);
   }, [segments])
 
   const tryAddControlPoints = () => {
@@ -98,8 +32,11 @@ export const UI = () => {
     addRandomSegment(relativeChecked, duration);
   }
 
+  const smoothCurveLines = () => {
+    
+  }
+
   const relativeCheckBoxRef = useRef();
-  const relativeNumberRef = useRef();
   const durationInputRef = useRef();
 
   return (
@@ -134,15 +71,12 @@ export const UI = () => {
       </div>
       <div style={{flexDirection: "row", justifyContent: "space-between"}}>
         <text style={{fontSize: "12px"}}>这条轨迹的动画时长(秒)(默认2秒):</text>
-        <input style={{width: "25px"}} ref={durationInputRef} />
+        <input style={{width: "25px"}} ref={durationInputRef} value={2} />
       </div>
       <button className="button" onClick={tryAddControlPoints}>
         添加轨迹
       </button>
-      <button className="button" onClick={() => alert('轨迹对齐')}>
-        轨迹对齐
-      </button>
-      <button className="button" onClick={() => alert('丝滑一下')}>
+      <button className="button" onClick={() => smoothCurveLines()}>
         丝滑一下
       </button>
       <button className="button" onClick={onCurveExport}>

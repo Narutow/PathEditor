@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DoubleSide, TextureLoader, Vector3 } from "three";
 import { useStore } from "../store";
-import { BACKGROUND_RATIO, WORLD_HEIGHT, WORLD_WIDTH } from "../types";
+import { BACKGROUND_RATIO, WORLD_WIDTH } from "../types";
 
 export default function SeatSphereContainer() {
 
