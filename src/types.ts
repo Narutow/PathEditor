@@ -1,5 +1,9 @@
 import { Vector3, Vector3Tuple } from "three"
 
+export const WORLD_WIDTH = 5.438624575852244;
+export const WORLD_HEIGHT = 11.547005383792515;
+export const BACKGROUND_RATIO = 2.2222222222222;
+
 export type ControlPointName =
   | "startPoint"
   | "endPoint"
@@ -146,10 +150,10 @@ export function convertRelativeControlPointsArray(controlPointsArray: ControlPoi
 export function convertToRelativeControlPoints(controlPoints: ControlPoints, micseat: Vector3[], relativeIndex: number): ControlPoints {
   if (!controlPoints) {
     return {
-      startPoint: [-2, -2, 1],
-      midPointA: [-1, 1, 4],
-      midPointB: [1, -1, -4],
-      endPoint: [2, 2, -1],
+      startPoint: [-1, -1, 0.5],
+      midPointA: [-0.5, 0.5, 2],
+      midPointB: [0.5, -0.5, -2],
+      endPoint: [1, 1, -0.5],
     };
   }
   const { startPoint, endPoint, midPointA, midPointB, pathExtra } = controlPoints;

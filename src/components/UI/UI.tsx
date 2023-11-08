@@ -104,16 +104,15 @@ export const UI = () => {
 
   return (
     <div className="ui-content">
-      <button className="button" onClick={tryAddControlPoints}>
-        随机添加轨迹
+      <button className="button" onClick={() => setPlayAnimation(true)}>
+        开始动画
+      </button>
+      <button className="button" onClick={() => setPlayAnimation(false)}>
+        暂停动画
       </button>
       <button className="button" onClick={removeSegments}>
         清除全部
       </button>
-      <button className="button" onClick={onCurveExport}>
-        导出参数
-      </button>
-
       <Radio.Group onChange={onRadioChanged} value={relativePointIndex}>
         <Radio value={0}>0</Radio>
         <div>
@@ -129,25 +128,15 @@ export const UI = () => {
         <Radio value={8}>8</Radio>
         </div>
       </Radio.Group>
-      <button className="button" onClick={() => setPlayAnimation(true)}>
-        预览动画
-      </button>
-      <button className="button" onClick={() => setPlayAnimation(false)}>
-        暂停动画
-      </button>
-      <input placeholder="起始点" onChange={(event) => {onInputChanged('Start', event.target.value)}} />
-      <input placeholder="控制点A" onChange={(event) => {onInputChanged('ControlA', event.target.value)}} />
-      <input placeholder="控制点B" onChange={(event) => {onInputChanged('ControlB', event.target.value)}} />
-      <input placeholder="结束点" onChange={(event) => {onInputChanged('End', event.target.value)}} />
       <div style={{flexDirection: "row", justifyContent: "space-between"}}>
         <input type="checkbox" ref={relativeCheckBoxRef} />
-        <text style={{fontSize: "12px"}}>相对坐标</text>
+        <text style={{fontSize: "12px"}}>使用相对坐标添加这条轨迹</text>
       </div>
       <div style={{flexDirection: "row", justifyContent: "space-between"}}>
-        <text style={{fontSize: "12px"}}>动画时长(秒):</text>
+        <text style={{fontSize: "12px"}}>这条轨迹的动画时长(秒)(默认2秒):</text>
         <input style={{width: "25px"}} ref={durationInputRef} />
       </div>
-      <button className="button" onClick={tryAddSegment}>
+      <button className="button" onClick={tryAddControlPoints}>
         添加轨迹
       </button>
       <button className="button" onClick={() => alert('轨迹对齐')}>
@@ -155,6 +144,9 @@ export const UI = () => {
       </button>
       <button className="button" onClick={() => alert('丝滑一下')}>
         丝滑一下
+      </button>
+      <button className="button" onClick={onCurveExport}>
+        导出参数
       </button>
     </div>
   )
@@ -188,8 +180,10 @@ function CurveItem(props: CurveProps) {
           <text className="point-text">B:{controlBPointStr}</text>
         </div>
       </div>
-      <button className="button" onClick={() => alert('编辑线段')}>编辑</button>
-      <button className="button" onClick={() => removeSegment(props.controlPoints)}>删除</button>
+      <view>
+        <button className="button" onClick={() => alert('编辑线段')}>编辑</button>
+        <button className="button" onClick={() => removeSegment(props.controlPoints)}>删除</button>  
+      </view>      
     </div>
   );
 }

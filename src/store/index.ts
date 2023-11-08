@@ -45,33 +45,33 @@ interface SegmentsState {
 
 export const useStore = create<SegmentsState>((set) => ({
   micseats: [
-    new Vector3(0, 4.9, 0),
-    new Vector3(-3.35, 2.1, 0),
-    new Vector3(-1.2, 2.1, 0),
-    new Vector3(1.2, 2.1, 0),
-    new Vector3(3.35, 2.1, 0),
-    new Vector3(-3.35, -0.35, 0),
-    new Vector3(-1.2, -0.35, 0),
-    new Vector3(1.2, -0.35, 0),
-    new Vector3(3.35, -0.35, 0),
+    new Vector3(0, 3.371443510055542, 0),
+    new Vector3(-1.85819673538208, 1.8153927326202393, 0),
+    new Vector3(-0.652634949102269, 1.8153927326202393, 0),
+    new Vector3(0.652634949102269, 1.8153927326202393, 0),
+    new Vector3(1.85819673538208, 1.8153927326202393, 0),
+    new Vector3(-1.85819673538208, 0.30466368794441223, 0),
+    new Vector3(-0.652634949102269, 0.30466368794441223, 0),
+    new Vector3(0.652634949102269, 0.30466368794441223, 0),
+    new Vector3(1.85819673538208, 0.30466368794441223, 0),
   ],
 
   segments: [
     {
-      startPoint: [-2, -2, 1],
-      midPointA: [-1, 1, 4],
-      midPointB: [1, -1, -4],
-      endPoint: [2, 2, -1],
+      startPoint: [-1, -1, 0.5],
+      midPointA: [-0.5, 0.5, 2],
+      midPointB: [0.5, -0.5, -2],
+      endPoint: [1, 1, -0.5],
     },
   ],
 
   // 初始值同segments一样
   viewSegments: [
     {
-      startPoint: [-2, -2, 1],
-      midPointA: [-1, 1, 4],
-      midPointB: [1, -1, -4],
-      endPoint: [2, 2, -1],
+      startPoint: [-1, -1, 0.5],
+      midPointA: [-0.5, 0.5, 2],
+      midPointB: [0.5, -0.5, -2],
+      endPoint: [1, 1, -0.5],
     },
   ],
 
