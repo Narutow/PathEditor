@@ -39,7 +39,9 @@ interface SegmentsState {
   removeSegment: (segment: ControlPoints) => void;
 
   // 设置当前相对于哪个坐标做编辑和预览
-  setRelativePointIndex: (v: number) => void;
+  setRelativePointIndex: (v: number, plan: number) => void;
+
+  smoothCurvePaths: (plan: number) => void;
 }
 
 export const useStore = create<SegmentsState>((set) => ({
@@ -57,20 +59,20 @@ export const useStore = create<SegmentsState>((set) => ({
 
   segments: [
     {
-      startPoint: [-1, -1, 0.5],
-      midPointA: [-0.5, 0.5, 2],
-      midPointB: [0.5, -0.5, -2],
-      endPoint: [1, 1, -0.5],
+      startPoint: [1.91, -0.91, 0],
+      midPointA: [0, -0.62, 0],
+      midPointB: [0, 0.35, 0],
+      endPoint: [0, 1.23, 0],
     },
   ],
 
   // 初始值同segments一样
   viewSegments: [
     {
-      startPoint: [-1, -1, 0.5],
-      midPointA: [-0.5, 0.5, 2],
-      midPointB: [0.5, -0.5, -2],
-      endPoint: [1, 1, -0.5],
+      startPoint: [1.91, -0.91, 0],
+      midPointA: [0, -0.62, 0],
+      midPointB: [0, 0.35, 0],
+      endPoint: [0, 1.23, 0],
     },
   ],
 
@@ -118,14 +120,14 @@ export const useStore = create<SegmentsState>((set) => ({
 
   setPlayAnimation: (v: boolean) => set({ playAnimation: v }),
 
-  setRelativePointIndex: (v: number) => set((state) => {
+  setRelativePointIndex: (v: number, plan: number) => set((state) => {
     const micseats = state.micseats;
     const newSegments = [...state.segments];
     const newViewSegments = convertRelativeControlPointsArray(cloneControlPointsArray(newSegments), micseats, v);
     
     return {
       relativePointIndex: v,
-      viewSegments: smoothControlPoints(newViewSegments),
+      viewSegments: smoothControlPoints(newViewSegments, plan),
     };
   }),
 
@@ -151,4 +153,19 @@ export const useStore = create<SegmentsState>((set) => ({
         viewSegments: newSegments,
       };
     }),
+
+  smoothCurvePaths: (plan: number) =>
+    set((state) => {
+      const micseats = state.micseats;
+      const relativeIndex = state.relativePointIndex;
+      // 对绝对坐标系的曲线做一次丝滑操作
+      const viewSegments = [...state.viewSegments];
+      const newViewSegments = smoothControlPoints(viewSegments, plan); // 经过丝滑过后的
+      // 得到的结果再转换成相对坐标系
+      const newSegments = convertToRelativeControlPointsArray(cloneControlPointsArray(newViewSegments), micseats, relativeIndex); // 经过转成相对坐标系后
+      return {
+        segments: newSegments,
+        viewSegments: newViewSegments,
+      };
+    })
 }))

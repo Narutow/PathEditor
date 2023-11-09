@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, useCallback, useRef } from "react"
+import { InputHTMLAttributes, useCallback, useRef, useState } from "react"
 import { useStore } from "../../store"
 import { ControlPoints } from "../../types"
 import { Radio, RadioChangeEvent } from "antd"
@@ -10,10 +10,11 @@ export const UI = () => {
   const setPlayAnimation = useStore((state) => state.setPlayAnimation)
   const relativePointIndex = useStore((state) => state.relativePointIndex);
   const setRelativePointIndex = useStore((state) => state.setRelativePointIndex);
+  const smoothCurvePaths = useStore((state) => state.smoothCurvePaths);
 
   const onRadioChanged = (e: RadioChangeEvent) => {
     console.log('radio checked, set relative micseat index: ', e.target.value);
-    setRelativePointIndex(e.target.value);
+    setRelativePointIndex(e.target.value, smoothPlan);
   };
 
   const onCurveExport = useCallback(async () => {
@@ -33,11 +34,17 @@ export const UI = () => {
   }
 
   const smoothCurveLines = () => {
-    
+    smoothCurvePaths(smoothPlan);
   }
 
   const relativeCheckBoxRef = useRef();
   const durationInputRef = useRef();
+
+  const [smoothPlan, setSmoothPlan] = useState(1);
+
+  const onSmoothPlanChange = (e: RadioChangeEvent, value: number) => {
+    setSmoothPlan(e.target.value);
+  }
 
   return (
     <div className="ui-content">
@@ -59,10 +66,10 @@ export const UI = () => {
           <Radio value={4}>4</Radio>
         </div>
         <div>
-        <Radio value={5}>5</Radio>
-        <Radio value={6}>6</Radio>
-        <Radio value={7}>7</Radio>
-        <Radio value={8}>8</Radio>
+          <Radio value={5}>5</Radio>
+          <Radio value={6}>6</Radio>
+          <Radio value={7}>7</Radio>
+          <Radio value={8}>8</Radio>
         </div>
       </Radio.Group>
       <div style={{flexDirection: "row", justifyContent: "space-between"}}>
@@ -76,6 +83,13 @@ export const UI = () => {
       <button className="button" onClick={tryAddControlPoints}>
         添加轨迹
       </button>
+      <Radio.Group 
+        style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}
+        onChange={(e) => onSmoothPlanChange(e, smoothPlan)} value={smoothPlan}
+      >
+        <Radio value={0}>丝滑整条曲线</Radio>
+        <Radio value={1}>丝滑衔接处</Radio>
+      </Radio.Group>
       <button className="button" onClick={() => smoothCurveLines()}>
         丝滑一下
       </button>

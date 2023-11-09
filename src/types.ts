@@ -77,32 +77,25 @@ export function addVector(controlPoints: ControlPoints, point: Vector3): Control
 };
 
 // 让贝塞尔曲线丝滑
-export function smoothControlPoints(controlPoints: ControlPoints[]): ControlPoints[] {
+export function smoothControlPoints(
+  controlPoints: ControlPoints[],
+  plan: number,
+): ControlPoints[] {
   for (let i = 0; i < controlPoints.length - 1; i++) {
-      let cur = controlPoints[i];
-      let next = controlPoints[i+1];
+    let cur = controlPoints[i];
+    let next = controlPoints[i+1];
 
-      //确保两个控制点相连
-      cur.endPoint = next.startPoint;
+    //确保两个控制点相连
+    cur.endPoint = next.startPoint;
 
-      //计算连接向量
-      let connectVector: Vector3Tuple = [
-          next.startPoint[0] - cur.endPoint[0],
-          next.startPoint[1] - cur.endPoint[1],
-          next.startPoint[2] - cur.endPoint[2]
-      ];
-
-      //使用连接向量调整当前曲线的第二个控制点 (midPointB)
-      cur.midPointB = adjustPoint(cur.midPointB, connectVector);
-
-      //使用反向连接向量调整下一条曲线的第一个控制点 (midPointA)
-      let reverseConnectVector: Vector3Tuple = [
-          -connectVector[0],
-          -connectVector[1],
-          -connectVector[2]
-      ];
-      next.midPointA = adjustPoint(next.midPointA, reverseConnectVector);
-  }
+    if (plan === 1) {
+      if (cur.pathExtra?.isRelative !== next.pathExtra?.isRelative) {
+        adjustControlPointsForSameAngleAndDistance3D(cur, next);
+      }
+    } else {
+      adjustControlPointsForSameAngleAndDistance3D(cur, next);
+    }
+  }  
   return controlPoints;
 }
 
@@ -150,10 +143,10 @@ export function convertRelativeControlPointsArray(controlPointsArray: ControlPoi
 export function convertToRelativeControlPoints(controlPoints: ControlPoints, micseat: Vector3[], relativeIndex: number): ControlPoints {
   if (!controlPoints) {
     return {
-      startPoint: [-1, -1, 0.5],
-      midPointA: [-0.5, 0.5, 2],
-      midPointB: [0.5, -0.5, -2],
-      endPoint: [1, 1, -0.5],
+      startPoint: [1.91, -0.91, 0],
+      midPointA: [0, -0.62, 0],
+      midPointB: [0, 0.35, 0],
+      endPoint: [0, 1.23, 0],
     };
   }
   const { startPoint, endPoint, midPointA, midPointB, pathExtra } = controlPoints;
@@ -214,4 +207,45 @@ export function generateAbsoluteControlPoints(
   };
 
   return newControlPoints;
+}
+
+function adjustControlPointsForSameAngleAndDistance3D(
+  controlPoints1: ControlPoints,
+  controlPoints2: ControlPoints
+){
+  // calculate the average distance from the control points to the join point
+  let distance1 = Math.sqrt(
+    Math.pow(controlPoints1.midPointB[0] - controlPoints1.endPoint[0], 2) +
+    Math.pow(controlPoints1.midPointB[1] - controlPoints1.endPoint[1], 2) +
+    Math.pow(controlPoints1.midPointB[2] - controlPoints1.endPoint[2], 2)
+  );
+  let distance2 = Math.sqrt(
+    Math.pow(controlPoints2.midPointA[0] - controlPoints2.startPoint[0], 2) +
+    Math.pow(controlPoints2.midPointA[1] - controlPoints2.startPoint[1], 2) +
+    Math.pow(controlPoints2.midPointA[2] - controlPoints2.startPoint[2], 2)
+  );
+  let averageDistance = (distance1 + distance2) / 2;
+
+  // compute the direction vector from the join point to the mid point
+  let dx = controlPoints1.midPointB[0] - controlPoints1.endPoint[0];
+  let dy = controlPoints1.midPointB[1] - controlPoints1.endPoint[1];
+  let dz = controlPoints1.midPointB[2] - controlPoints1.endPoint[2];
+  let directionMagnitude = Math.sqrt(dx*dx + dy*dy + dz*dz);
+  
+  // normalize the direction vector
+  dx /= directionMagnitude;
+  dy /= directionMagnitude;
+  dz /= directionMagnitude;
+  
+  // calculate the position of the new control points
+  controlPoints1.midPointB = [
+    controlPoints1.endPoint[0] + dx * averageDistance,
+    controlPoints1.endPoint[1] + dy * averageDistance,
+    controlPoints1.endPoint[2] + dz * averageDistance
+  ];
+  controlPoints2.midPointA = [
+    controlPoints2.startPoint[0] - dx * averageDistance,
+    controlPoints2.startPoint[1] - dy * averageDistance,
+    controlPoints2.startPoint[2] - dz * averageDistance
+  ];
 }
