@@ -1,105 +1,102 @@
-import { useCallback, useState } from "react"
+import { InputHTMLAttributes, useCallback, useRef, useState } from "react"
 import { useStore } from "../../store"
-import { Vector3Tuple } from "three"
 import { ControlPoints } from "../../types"
+import { Radio, RadioChangeEvent } from "antd"
 
 export const UI = () => {
-  const segments = useStore((state) => state.segments)
+  const segments = useStore((state) => state.segments);
   const addRandomSegment = useStore((state) => state.addRandomSegment)
   const removeSegments = useStore((state) => state.removeSegments)
   const setPlayAnimation = useStore((state) => state.setPlayAnimation)
-  const addSegment = useStore((state) => state.addSegment);
+  const relativePointIndex = useStore((state) => state.relativePointIndex);
+  const setRelativePointIndex = useStore((state) => state.setRelativePointIndex);
+  const smoothCurvePaths = useStore((state) => state.smoothCurvePaths);
 
-  // 定义四个input框的状态数据
-  const [start, setStart] = useState('');
-  const [controlA, setControlA] = useState('');
-  const [controlB, setControlB] = useState('');
-  const [end, setEnd] = useState('');
-  const onInputChanged = (type: string, value: string) => {
-    if (type === 'Start') {
-      setStart(value);
-    } else if (type === 'ControlA') {
-      setControlA(value);
-    } else if (type === 'ControlB') {
-      setControlB(value);
-    } else if (type === 'End') {
-      setEnd(value);
-    }
-  }
+  const onRadioChanged = (e: RadioChangeEvent) => {
+    console.log('radio checked, set relative micseat index: ', e.target.value);
+    setRelativePointIndex(e.target.value, smoothPlan);
+  };
 
-  function parseInput(input: string): {success: boolean, result: number[]} {
-    const result = input.split(',').map(s => parseFloat(s.trim()));
-    let success = true;
-    if (result.some(isNaN)) {
-      success = false;
-    }    
-    return {success, result};
-  }
-
-
-  const tryAddSegment = () => {
-    const parsedStartData = parseInput(start);
-    const parsedControlAData = parseInput(controlA);
-    const parsedControlBData = parseInput(controlB);
-    const parsedEndData = parseInput(end);
-    if (!parsedStartData.success) {
-      alert('请检查起始点数据输入格式,是\"1.0, 2, 3.5\"这种形式的数据');
-      return;
-    }
-    if (!parsedControlAData.success) {
-      alert('请检查控制点A数据输入格式,是\"1.0, 2, 3.5\"这种形式的数据');
-      return;
-    }
-    if (!parsedControlBData.success) {
-      alert('请检查控制点B数据输入格式,是\"1.0, 2, 3.5\"这种形式的数据');
-      return;
-    }
-    if (!parsedEndData.success) {
-      alert('请检查结束点数据输入格式,是\"1.0, 2, 3.5\"这种形式的数据');
-      return;
-    }
-    const controlPoints = {
-      startPoint: parsedStartData.result as Vector3Tuple,
-      endPoint: parsedEndData.result as Vector3Tuple,
-      midPointA: parsedControlAData.result as Vector3Tuple,
-      midPointB: parsedControlBData.result as Vector3Tuple,
-    };
-    addSegment(controlPoints);
-  }
-
-  const onCurveExport = useCallback(() => {
-    let str = ""
+  const onCurveExport = useCallback(async () => {
+    let str = "";
     segments.forEach((controlPoints) => {
-      str += `B(t) = (1-t)³(${controlPoints.startPoint}) + 3(1 - t)²t(${controlPoints.midPointA}) + 3(1 - t)t²(${controlPoints.midPointB}) + t³(${controlPoints.endPoint}); \n`
-    })
-    alert(str)
+      str += `S:(${controlPoints.startPoint}). A:(${controlPoints.midPointA}). B:(${controlPoints.midPointB}), E:(${controlPoints.endPoint}), R:(${controlPoints.pathExtra?.isRelative}), D:(${controlPoints.pathExtra?.duration}) \n\n`
+    });
+    
+    await navigator.clipboard.writeText(str)
+    alert('已复制如下内容到剪贴板:\n' + str);
   }, [segments])
+
+  const tryAddControlPoints = () => {
+    const relativeChecked = (relativeCheckBoxRef?.current as InputHTMLAttributes<HTMLInputElement>)?.checked;
+    const duration = (durationInputRef?.current as InputHTMLAttributes<HTMLInputElement>)?.value as number;
+    addRandomSegment(relativeChecked, duration);
+  }
+
+  const smoothCurveLines = () => {
+    smoothCurvePaths(smoothPlan);
+  }
+
+  const relativeCheckBoxRef = useRef();
+  const durationInputRef = useRef();
+
+  const [smoothPlan, setSmoothPlan] = useState(1);
+
+  const onSmoothPlanChange = (e: RadioChangeEvent, value: number) => {
+    setSmoothPlan(e.target.value);
+  }
 
   return (
     <div className="ui-content">
-      <button className="button" onClick={addRandomSegment}>
-        随机添加轨迹
-      </button>
-      <button className="button" onClick={removeSegments}>
-        清除全部
-      </button>
-      <button className="button" onClick={onCurveExport}>
-        导出参数
-      </button>
       <button className="button" onClick={() => setPlayAnimation(true)}>
-        播放动画
+        开始动画
       </button>
       <button className="button" onClick={() => setPlayAnimation(false)}>
         暂停动画
       </button>
-      <input placeholder="起始点" onChange={(event) => {onInputChanged('Start', event.target.value)}} />
-      <input placeholder="控制点A" onChange={(event) => {onInputChanged('ControlA', event.target.value)}} />
-      <input placeholder="控制点B" onChange={(event) => {onInputChanged('ControlB', event.target.value)}} />
-      <input placeholder="结束点" onChange={(event) => {onInputChanged('End', event.target.value)}} />
-      <button className="button" onClick={tryAddSegment}>
+      <button className="button" onClick={removeSegments}>
+        清除全部
+      </button>
+      <Radio.Group onChange={onRadioChanged} value={relativePointIndex}>
+        <Radio value={0}>0</Radio>
+        <div>
+          <Radio value={1}>1</Radio>
+          <Radio value={2}>2</Radio>
+          <Radio value={3}>3</Radio>
+          <Radio value={4}>4</Radio>
+        </div>
+        <div>
+          <Radio value={5}>5</Radio>
+          <Radio value={6}>6</Radio>
+          <Radio value={7}>7</Radio>
+          <Radio value={8}>8</Radio>
+        </div>
+      </Radio.Group>
+      <div style={{flexDirection: "row", justifyContent: "space-between"}}>
+        <input type="checkbox" ref={relativeCheckBoxRef} />
+        <text style={{fontSize: "12px"}}>使用相对坐标添加这条轨迹</text>
+      </div>
+      <div style={{flexDirection: "row", justifyContent: "space-between"}}>
+        <text style={{fontSize: "12px"}}>这条轨迹的动画时长(秒)(默认2秒):</text>
+        <input style={{width: "25px"}} ref={durationInputRef} value={2} />
+      </div>
+      <button className="button" onClick={tryAddControlPoints}>
         添加轨迹
       </button>
-          </div>
+      <Radio.Group 
+        style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}
+        onChange={(e) => onSmoothPlanChange(e, smoothPlan)} value={smoothPlan}
+      >
+        <Radio value={0}>丝滑整条曲线</Radio>
+        <Radio value={1}>丝滑衔接处</Radio>
+      </Radio.Group>
+      <button className="button" onClick={() => smoothCurveLines()}>
+        丝滑一下
+      </button>
+      <button className="button" onClick={onCurveExport}>
+        导出参数
+      </button>
+    </div>
   )
 }
 
@@ -131,7 +128,10 @@ function CurveItem(props: CurveProps) {
           <text className="point-text">B:{controlBPointStr}</text>
         </div>
       </div>
-      <button className="button" onClick={() => removeSegment(props.controlPoints)}>删除</button>
+      <view>
+        <button className="button" onClick={() => alert('编辑线段')}>编辑</button>
+        <button className="button" onClick={() => removeSegment(props.controlPoints)}>删除</button>  
+      </view>      
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { MutableRefObject } from "react"
 
-import { CubicBezierCurve3, Vector3, Vector3Tuple } from "three"
+import { CubicBezierCurve3, Line, Vector3, Vector3Tuple } from "three"
 import { ControlPoints } from "../types"
 
 const p0 = new Vector3()
@@ -30,9 +30,15 @@ export const updateCurve = (
   }
 }
 
-export const getRandomPoint = () =>
-  [
-    Math.random() * 20 - 10,
-    Math.random() * 20 - 10,
-    Math.random() * 20 - 10,
-  ] as Vector3Tuple
+export const updateControlLine = (
+  newPoints: ControlPoints,
+  startARef: MutableRefObject<any>,
+  endBRef: MutableRefObject<any>
+) => {
+  startARef.current.geometry.setPositions(
+    ([newPoints['startPoint'], newPoints['midPointA']]).flat()
+  );
+  endBRef.current.geometry.setPositions(
+    ([newPoints['endPoint'], newPoints['midPointB']]).flat()
+  );
+}

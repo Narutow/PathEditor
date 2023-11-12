@@ -5,6 +5,7 @@ import { BezierCurveEditor } from "./components/BezierCurveEditor"
 import { CurveList, UI } from "./components/UI/UI"
 import { Vector3 } from "three"
 import SeatSphereContainer from "./components/SeatSphereContainer"
+import { WORLD_WIDTH } from "./types"
 
 export default function App() {
   return (
@@ -26,7 +27,7 @@ export default function App() {
       >
         <BezierCurveEditor />
         <ambientLight intensity={2} />
-        <gridHelper args={[20, 20, "#FFF", "#CCC"]} />
+        <gridHelper args={[2 * WORLD_WIDTH, 40, "#FFF", "#CCC"]} />
         <OrbitControls makeDefault />
         <SeatSphereContainer />
       </Canvas>
