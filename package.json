@@ -21,7 +21,8 @@
     "react-dom": "18.2.0",
     "react-scripts": "5.0.1",
     "three": "0.142.0",
-    "zustand": "4.1.1"
+    "zundo": "^2.0.0",
+    "zustand": "4.3.0"
   },
   "devDependencies": {
     "@types/react": "17.0.0",

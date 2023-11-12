@@ -1,16 +1,16 @@
 import { InputHTMLAttributes, useCallback, useRef, useState } from "react"
-import { useStore } from "../../store"
+import { useStoreWithUndo } from "../../store"
 import { ControlPoints } from "../../types"
 import { Radio, RadioChangeEvent } from "antd"
 
 export const UI = () => {
-  const segments = useStore((state) => state.segments);
-  const addRandomSegment = useStore((state) => state.addRandomSegment)
-  const removeSegments = useStore((state) => state.removeSegments)
-  const setPlayAnimation = useStore((state) => state.setPlayAnimation)
-  const relativePointIndex = useStore((state) => state.relativePointIndex);
-  const setRelativePointIndex = useStore((state) => state.setRelativePointIndex);
-  const smoothCurvePaths = useStore((state) => state.smoothCurvePaths);
+  const segments = useStoreWithUndo((state) => state.segments);
+  const addRandomSegment = useStoreWithUndo((state) => state.addRandomSegment)
+  const removeSegments = useStoreWithUndo((state) => state.removeSegments)
+  const setPlayAnimation = useStoreWithUndo((state) => state.setPlayAnimation)
+  const relativePointIndex = useStoreWithUndo((state) => state.relativePointIndex);
+  const setRelativePointIndex = useStoreWithUndo((state) => state.setRelativePointIndex);
+  const smoothCurvePaths = useStoreWithUndo((state) => state.smoothCurvePaths);
 
   const onRadioChanged = (e: RadioChangeEvent) => {
     console.log('radio checked, set relative micseat index: ', e.target.value);
@@ -23,7 +23,8 @@ export const UI = () => {
       str += `S:(${controlPoints.startPoint}). A:(${controlPoints.midPointA}). B:(${controlPoints.midPointB}), E:(${controlPoints.endPoint}), R:(${controlPoints.pathExtra?.isRelative}), D:(${controlPoints.pathExtra?.duration}) \n\n`
     });
     
-    await navigator.clipboard.writeText(str)
+    unsecuredCopyToClipboard(str);
+    
     alert('已复制如下内容到剪贴板:\n' + str);
   }, [segments])
 
@@ -78,7 +79,7 @@ export const UI = () => {
       </div>
       <div style={{flexDirection: "row", justifyContent: "space-between"}}>
         <text style={{fontSize: "12px"}}>这条轨迹的动画时长(秒)(默认2秒):</text>
-        <input style={{width: "25px"}} ref={durationInputRef} value={2} />
+        <input style={{width: "25px"}} ref={durationInputRef} />
       </div>
       <button className="button" onClick={tryAddControlPoints}>
         添加轨迹
@@ -112,7 +113,7 @@ function CurveItem(props: CurveProps) {
   const controlBPointStr = midPointB.map(val => val.toFixed(2)).join(', ');
   const endPointStr = endPoint.map(val => val.toFixed(2)).join(', ');
 
-  const removeSegment = useStore((state) => state.removeSegment)
+  const removeSegment = useStoreWithUndo((state) => state.removeSegment)
 
   return (
     <div className="curve-item-container">
@@ -137,7 +138,7 @@ function CurveItem(props: CurveProps) {
 }
 
 export function CurveList() {
-  const segments = useStore((state) => state.segments);
+  const segments = useStoreWithUndo((state) => state.segments);
 
   return (
     <div className="curve-list-container">
@@ -146,4 +147,18 @@ export function CurveList() {
     })}
     </div>
   );
+}
+
+function unsecuredCopyToClipboard(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+  } catch (err) {
+    console.error('Unable to copy to clipboard', err);
+  }
+  document.body.removeChild(textArea);
 }

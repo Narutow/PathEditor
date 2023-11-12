@@ -6,13 +6,13 @@ import { updateControlLine, updateCurve } from "../utils/helpers"
 import { BezierLineSegment } from "./BezierLineSegment"
 import { ControlPoint } from "./ControlPoint"
 import { ControlPointName, ControlPoints } from "../types"
-import { useStore } from "../store"
+import { useStoreWithUndo, useTemporalStore } from "../store"
 import { useAnimation } from "./useAnimation"
 
 export const BezierCurveEditor = () => {
   const { scene } = useThree()
-  const viewSegments = useStore((state) => state.viewSegments)
-  const updateSegment = useStore((state) => state.updateSegment)
+  const viewSegments = useStoreWithUndo((state) => state.viewSegments)
+  const updateSegment = useStoreWithUndo((state) => state.updateSegment)
   const [
     selectedControlPoint,
     setSelectedControlPoint,
@@ -33,6 +33,30 @@ export const BezierCurveEditor = () => {
   const testObj = useRef<Mesh>()
 
   useAnimation(testObj)
+
+  const { undo, redo } = useTemporalStore((state) => state);
+
+  useEffect(() => {
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    }; 
+  });
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.defaultPrevented) {
+      return;
+    }
+    let handled = false;
+    if (event.ctrlKey && event.shiftKey && event.code === "KeyZ") {
+      redo();
+    } else if ((event.ctrlKey) && event.code === "KeyZ") {
+      undo();
+    }
+    if (handled) {
+      event.preventDefault();
+    }
+  }
 
   const onControlPointSelect = useCallback(
     (name: ControlPointName, segmentIndex: number, idName: string) => {

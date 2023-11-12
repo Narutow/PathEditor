@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DoubleSide, TextureLoader, Vector3 } from "three";
-import { useStore } from "../store";
+import { useStoreWithUndo } from "../store";
 import { BACKGROUND_RATIO, WORLD_WIDTH } from "../types";
 
 export default function SeatSphereContainer() {
@@ -16,14 +16,14 @@ export default function SeatSphereContainer() {
     );
   }
 
-  const micseats = useStore((state) => state.micseats)
+  const micseats = useStoreWithUndo((state) => state.micseats)
   
   const [texture, setTexture] = useState(null)
   
   useEffect(() => {
     const loader = new TextureLoader()
     loader.load(
-      '/main_audio_scene.jpeg',
+      '/main_audio_scene.png',
       texture => {
         // 在纹理成功加载后进行更新
         setTexture(texture)
@@ -36,7 +36,7 @@ export default function SeatSphereContainer() {
   return (
     <>
       <mesh
-        position={[0, 0.28, 0]}
+        position={[0, 0.65, 0]}
       >
         <planeGeometry args={[WORLD_WIDTH, WORLD_WIDTH * BACKGROUND_RATIO]} />
         <meshStandardMaterial map={texture} side={DoubleSide} opacity={0.5} transparent />
