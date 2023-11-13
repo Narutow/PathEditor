@@ -1,2 +1,1 @@
-# 3d-bezier-curve-editor
-Created with CodeSandbox
+# 3D礼物路径编辑器

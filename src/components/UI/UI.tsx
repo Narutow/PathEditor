@@ -1,7 +1,8 @@
-import { InputHTMLAttributes, useCallback, useRef, useState } from "react"
+import { InputHTMLAttributes, useCallback, useEffect, useRef, useState } from "react"
 import { useStoreWithUndo } from "../../store"
 import { ControlPoints } from "../../types"
 import { Radio, RadioChangeEvent } from "antd"
+import { Vector3Tuple } from "three"
 
 export const UI = () => {
   const segments = useStoreWithUndo((state) => state.segments);
@@ -101,36 +102,94 @@ export const UI = () => {
   )
 }
 
+/**
+ * 可编辑文本,双击后切换到输入框形态,输入框失去焦点后立刻设入数据.
+ */
+function EditableText(props: any) {
+  const [editMode, setEditMode] = useState(false);
+  const inputRef = useRef<HTMLInputElement>();
+  const lastValue = props.value;
+  const onChanged = props.onChanged;
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [editMode]);
+
+  const onDoubleClick = () => {
+    if (!editMode) {
+      setEditMode(true);
+    }
+  }
+
+  const onBlur = () => {
+    if (editMode) {
+      setEditMode(false);
+      const newValue = Number(inputRef.current.value);
+      if (Math.abs(lastValue - newValue) > 0.0000001) {
+        onChanged(lastValue, newValue);
+      }
+    }
+  }
+
+  return (
+    <>
+      {editMode ?
+        <input className="point-input" onBlur={onBlur} ref={inputRef} defaultValue={lastValue} /> :
+        <text className="point-text" onDoubleClick={onDoubleClick}>{props.value}</text>
+      }
+    </>
+  );
+}
+
+function EditableCurveItem(props: any) {
+  const v3 = props.value as Vector3Tuple;
+  const prefix = props.prefix as string;
+  const onChanged = props.onChanged;
+  const updateValue = (value: Vector3Tuple) => {
+    onChanged(value);
+  };
+  return (
+    <>
+      <text className="point-text">{prefix}(</text>
+      <EditableText value={v3[0]} onChanged={(lastValue: number, newValue: number) => { v3[0] = newValue; updateValue(v3); }} />
+      <text className="point-text">, </text>
+      <EditableText value={v3[1]} onChanged={(lastValue: number, newValue: number) => { v3[1] = newValue; updateValue(v3); }} />
+      <text className="point-text">, </text>
+      <EditableText value={v3[2]} onChanged={(lastValue: number, newValue: number) => { v3[2] = newValue; updateValue(v3); }} />
+      <text className="point-text">)</text>
+    </>
+  );
+}
+
 type CurveProps = {
   controlPoints: ControlPoints,
+  index: number,
 };
 
 function CurveItem(props: CurveProps) {
   const { startPoint, endPoint, midPointA, midPointB } = props.controlPoints;
-  
-  const startPointStr = startPoint.map(val => val.toFixed(2)).join(', ');
-  const controlAPointStr = midPointA.map(val => val.toFixed(2)).join(', ');
-  const controlBPointStr = midPointB.map(val => val.toFixed(2)).join(', ');
-  const endPointStr = endPoint.map(val => val.toFixed(2)).join(', ');
-
-  const removeSegment = useStoreWithUndo((state) => state.removeSegment)
+  const index = props.index;
+  const removeSegment = useStoreWithUndo((state) => state.removeSegment);
+  const updateSegment = useStoreWithUndo((state) => state.updateSegment);
+  const onChanged = (value: ControlPoints) => {
+    updateSegment(index, value);
+  };
 
   return (
     <div className="curve-item-container">
       <div className="points-container">
         <div className="points-row">
-          <text className="point-text">S:{startPointStr}</text>
+          <EditableCurveItem value={startPoint} prefix={"S:"} onChanged={(value: Vector3Tuple) => { onChanged({startPoint: value, endPoint, midPointA, midPointB}); }} />
           <div style={{width: "10px"}}/>
-          <text className="point-text">E:{endPointStr}</text>
+          <EditableCurveItem value={endPoint} prefix={"E:"} onChanged={(value: Vector3Tuple) => { onChanged({startPoint, endPoint: value, midPointA, midPointB}); }} />
         </div>
         <div className="points-row">
-          <text className="point-text">A:{controlAPointStr}</text>
+          <EditableCurveItem value={midPointA} prefix={"A:"} onChanged={(value: Vector3Tuple) => { onChanged({startPoint, endPoint, midPointA: value, midPointB}); }} />
           <div style={{width: "10px"}}/>
-          <text className="point-text">B:{controlBPointStr}</text>
+          <EditableCurveItem value={midPointB} prefix={"B:"} onChanged={(value: Vector3Tuple) => { onChanged({startPoint, endPoint, midPointA, midPointB: value}); }} />
         </div>
       </div>
       <view>
-        <button className="button" onClick={() => alert('编辑线段')}>编辑</button>
         <button className="button" onClick={() => removeSegment(props.controlPoints)}>删除</button>  
       </view>      
     </div>
@@ -143,7 +202,7 @@ export function CurveList() {
   return (
     <div className="curve-list-container">
     {segments && segments.map((value: ControlPoints, index: number) => {
-      return <CurveItem controlPoints={value} key={index} />
+      return <CurveItem controlPoints={value} key={index} index={index} />
     })}
     </div>
   );
