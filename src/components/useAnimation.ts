@@ -1,11 +1,11 @@
 import gsap from "gsap"
-import { MutableRefObject, useEffect, useMemo, useState } from "react"
-import { Object3D } from "three"
+import { MutableRefObject, RefObject, useEffect, useMemo, useState } from "react"
+import { Mesh } from "three"
 import { useStoreWithUndo } from "../store"
 import { getCubicBezierPoint } from "../utils/interpolation"
 
 export const useAnimation = (
-  object: MutableRefObject<Object3D | undefined>
+  object: RefObject<Mesh | undefined>
 ) => {
   const [objectLoading, setObjectLoading] = useState(true)
   const viewSegments = useStoreWithUndo((state) => state.viewSegments)

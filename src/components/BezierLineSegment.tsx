@@ -1,5 +1,6 @@
 import { CubicBezierLine, Line } from "@react-three/drei"
 import { ControlPoints } from "../types"
+import React from "react"
 
 const lineProps = {
   lineWidth: 0.7,

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { DoubleSide, TextureLoader, Vector3 } from "three";
+import { DoubleSide, TextureLoader, Vector3, Texture } from "three";
 import { useStoreWithUndo } from "../store";
 import { BACKGROUND_RATIO, WORLD_WIDTH } from "../types";
+import React from "react";
 
 export default function SeatSphereContainer() {
 
@@ -18,15 +19,15 @@ export default function SeatSphereContainer() {
 
   const micseats = useStoreWithUndo((state) => state.micseats)
   
-  const [texture, setTexture] = useState(null)
+  const [texture, setTexture] = useState<Texture>();
   
   useEffect(() => {
     const loader = new TextureLoader()
     loader.load(
       '/main_audio_scene.png',
-      texture => {
+      t => {
         // 在纹理成功加载后进行更新
-        setTexture(texture)
+        setTexture(t)
       }, undefined, error => {
         console.error('An error occurred while loading the texture.', error)
       }

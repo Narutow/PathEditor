@@ -6,6 +6,7 @@ import { CurveList, UI } from "./components/UI/UI"
 import { Vector3 } from "three"
 import SeatSphereContainer from "./components/SeatSphereContainer"
 import { WORLD_WIDTH } from "./types"
+import React from "react"
 
 export default function App() {
   return (

@@ -3,6 +3,7 @@ import { useStoreWithUndo } from "../../store"
 import { ControlPoints } from "../../types"
 import { Radio, RadioChangeEvent } from "antd"
 import { Vector3Tuple } from "three"
+import React from "react"
 
 export const UI = () => {
   const segments = useStoreWithUndo((state) => state.segments);
@@ -30,8 +31,8 @@ export const UI = () => {
   }, [segments])
 
   const tryAddControlPoints = () => {
-    const relativeChecked = (relativeCheckBoxRef?.current as InputHTMLAttributes<HTMLInputElement>)?.checked;
-    const duration = (durationInputRef?.current as InputHTMLAttributes<HTMLInputElement>)?.value as number;
+    const relativeChecked = Boolean((relativeCheckBoxRef?.current)?.checked ?? false);
+    const duration = Number((durationInputRef?.current)?.value ?? 2);
     addRandomSegment(relativeChecked, duration);
   }
 
@@ -39,8 +40,8 @@ export const UI = () => {
     smoothCurvePaths(smoothPlan);
   }
 
-  const relativeCheckBoxRef = useRef();
-  const durationInputRef = useRef();
+  const relativeCheckBoxRef = useRef<HTMLInputElement>(null);
+  const durationInputRef = useRef<HTMLInputElement>(null);
 
   const [smoothPlan, setSmoothPlan] = useState(1);
 
@@ -107,7 +108,7 @@ export const UI = () => {
  */
 function EditableText(props: any) {
   const [editMode, setEditMode] = useState(false);
-  const inputRef = useRef<HTMLInputElement>();
+  const inputRef = useRef<HTMLInputElement>(null);
   const lastValue = props.value;
   const onChanged = props.onChanged;
 
@@ -124,7 +125,7 @@ function EditableText(props: any) {
   const onBlur = () => {
     if (editMode) {
       setEditMode(false);
-      const newValue = Number(inputRef.current.value);
+      const newValue = Number(inputRef.current?.value ?? lastValue);
       if (Math.abs(lastValue - newValue) > 0.0000001) {
         onChanged(lastValue, newValue);
       }

@@ -1,6 +1,7 @@
 import { Vector3Tuple } from "three"
 import { ControlPointName } from "../types"
 import { useState } from "react"
+import React from "react"
 
 interface ControlPointProps {
   idName: string

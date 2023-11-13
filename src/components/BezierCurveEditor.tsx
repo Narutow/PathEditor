@@ -1,13 +1,14 @@
 import { useState, useRef, useCallback, Fragment, useEffect } from "react"
 import { TransformControls } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
-import { Mesh, Object3D } from "three"
+import { Object3D } from "three"
 import { updateControlLine, updateCurve } from "../utils/helpers"
 import { BezierLineSegment } from "./BezierLineSegment"
 import { ControlPoint } from "./ControlPoint"
 import { ControlPointName, ControlPoints } from "../types"
 import { useStoreWithUndo, useTemporalStore } from "../store"
 import { useAnimation } from "./useAnimation"
+import React from "react"
 
 export const BezierCurveEditor = () => {
   const { scene } = useThree()
@@ -30,7 +31,7 @@ export const BezierCurveEditor = () => {
   const selectedControlPointRef = useRef<Object3D | null>()
   const newControlPoints = useRef<ControlPoints | null>(null)
   const prevSegmentControlPoints = useRef<ControlPoints | null>(null)
-  const testObj = useRef<Mesh>()
+  const testObj = useRef<THREE.Mesh>(null);
 
   useAnimation(testObj)
 
