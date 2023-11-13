@@ -1,5 +1,5 @@
 import create, { useStore } from "zustand"
-import { ControlPoints, generateAbsoluteControlPoints, cloneControlPointsArray, convertRelativeControlPointsArray, removeElement, convertToRelativeControlPoints, smoothControlPoints, convertToRelativeControlPointsArray } from "../types"
+import { ControlPoints, generateAbsoluteControlPoints, cloneControlPointsArray, convertRelativeControlPointsArray, removeElement, convertToRelativeControlPoints, smoothControlPoints, convertToRelativeControlPointsArray, PathExtra } from "../types"
 import { Vector3 } from "three"
 import { TemporalState, temporal } from "zundo";
 
@@ -43,6 +43,8 @@ interface SegmentsState {
   setRelativePointIndex: (v: number, plan: number) => void;
 
   smoothCurvePaths: (plan: number) => void;
+
+  importCurvePaths: (segments: ControlPoints[]) => void;
 }
 
 export const useTemporalStore = <T,>(
@@ -69,6 +71,7 @@ export const useStoreWithUndo = create<SegmentsState>()(temporal((set) => ({
       midPointA: [0, -0.62, 0],
       midPointB: [0, 0.35, 0],
       endPoint: [0, 1.23, 0],
+      pathExtra: {duration: 2, isRelative: false} as PathExtra
     },
   ],
 
@@ -79,6 +82,7 @@ export const useStoreWithUndo = create<SegmentsState>()(temporal((set) => ({
       midPointA: [0, -0.62, 0],
       midPointB: [0, 0.35, 0],
       endPoint: [0, 1.23, 0],
+      pathExtra: {duration: 2, isRelative: false} as PathExtra
     },
   ],
 
@@ -174,6 +178,16 @@ export const useStoreWithUndo = create<SegmentsState>()(temporal((set) => ({
         viewSegments: newViewSegments,
       };
     }),
-    
+
+  importCurvePaths: (segments: ControlPoints[]) =>
+    set((state) => {
+      const micseats = state.micseats;
+      const relativeIndex = state.relativePointIndex;
+      const viewSegments = convertRelativeControlPointsArray(cloneControlPointsArray(segments), micseats, relativeIndex);
+      return {
+        segments: segments,
+        viewSegments: viewSegments,
+      };
+    }),
   })),
 );

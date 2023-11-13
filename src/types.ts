@@ -147,6 +147,7 @@ export function convertToRelativeControlPoints(controlPoints: ControlPoints, mic
       midPointA: [0, -0.62, 0],
       midPointB: [0, 0.35, 0],
       endPoint: [0, 1.23, 0],
+      pathExtra: {duration: 2, isRelative: false}
     };
   }
   const { startPoint, endPoint, midPointA, midPointB, pathExtra } = controlPoints;

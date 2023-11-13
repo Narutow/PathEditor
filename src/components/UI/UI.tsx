@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useStoreWithUndo } from "../../store"
 import { ControlPoints } from "../../types"
 import { Radio, RadioChangeEvent } from "antd"
@@ -13,22 +13,23 @@ export const UI = () => {
   const relativePointIndex = useStoreWithUndo((state) => state.relativePointIndex);
   const setRelativePointIndex = useStoreWithUndo((state) => state.setRelativePointIndex);
   const smoothCurvePaths = useStoreWithUndo((state) => state.smoothCurvePaths);
-
+  const importCurvePaths = useStoreWithUndo((state) => state.importCurvePaths);
+  
   const onRadioChanged = (e: RadioChangeEvent) => {
     console.log('radio checked, set relative micseat index: ', e.target.value);
     setRelativePointIndex(e.target.value, smoothPlan);
   };
 
   const onCurveExport = useCallback(async () => {
-    let str = "";
-    segments.forEach((controlPoints) => {
-      str += `S:(${controlPoints.startPoint}). A:(${controlPoints.midPointA}). B:(${controlPoints.midPointB}), E:(${controlPoints.endPoint}), R:(${controlPoints.pathExtra?.isRelative}), D:(${controlPoints.pathExtra?.duration}) \n\n`
-    });
-    
+    const str = JSON.stringify(segments);
     unsecuredCopyToClipboard(str);
-    
     alert('已复制如下内容到剪贴板:\n' + str);
-  }, [segments])
+  }, [segments]);
+
+  const onCurveImport = useCallback(() => {
+    const str = prompt('请输入参数');
+    importCurvePaths(JSON.parse(str));
+  }, [segments]);
 
   const tryAddControlPoints = () => {
     const relativeChecked = Boolean((relativeCheckBoxRef?.current)?.checked ?? false);
@@ -51,6 +52,9 @@ export const UI = () => {
 
   return (
     <div className="ui-content">
+      <button className="button" onClick={onCurveImport}>
+        导入参数
+      </button>
       <button className="button" onClick={() => setPlayAnimation(true)}>
         开始动画
       </button>
@@ -80,8 +84,8 @@ export const UI = () => {
         <text style={{fontSize: "12px"}}>使用相对坐标添加这条轨迹</text>
       </div>
       <div style={{flexDirection: "row", justifyContent: "space-between"}}>
-        <text style={{fontSize: "12px"}}>这条轨迹的动画时长(秒)(默认2秒):</text>
-        <input style={{width: "25px"}} ref={durationInputRef} />
+        <text style={{fontSize: "12px"}}>这条轨迹的动画时长(秒):</text>
+        <input style={{width: "25px"}} ref={durationInputRef} defaultValue={2} />
       </div>
       <button className="button" onClick={tryAddControlPoints}>
         添加轨迹
@@ -168,12 +172,21 @@ type CurveProps = {
 };
 
 function CurveItem(props: CurveProps) {
-  const { startPoint, endPoint, midPointA, midPointB } = props.controlPoints;
+  const { startPoint, endPoint, midPointA, midPointB, pathExtra } = props.controlPoints;
   const index = props.index;
   const removeSegment = useStoreWithUndo((state) => state.removeSegment);
   const updateSegment = useStoreWithUndo((state) => state.updateSegment);
   const onChanged = (value: ControlPoints) => {
     updateSegment(index, value);
+  };
+  const [checked, setChecked] = useState(pathExtra?.isRelative ?? false);
+  const onCheckChanged = (event: any) => {
+    const isChecked = event.target?.checked ?? false;
+    setChecked(isChecked);
+    if (pathExtra) {
+      pathExtra.isRelative = isChecked;
+      updateSegment(index, {startPoint, endPoint, midPointA, midPointB, pathExtra});
+    }
   };
 
   return (
@@ -183,11 +196,22 @@ function CurveItem(props: CurveProps) {
           <EditableCurveItem value={startPoint} prefix={"S:"} onChanged={(value: Vector3Tuple) => { onChanged({startPoint: value, endPoint, midPointA, midPointB}); }} />
           <div style={{width: "10px"}}/>
           <EditableCurveItem value={endPoint} prefix={"E:"} onChanged={(value: Vector3Tuple) => { onChanged({startPoint, endPoint: value, midPointA, midPointB}); }} />
+          <div style={{width: "10px"}}/>
+          <text className="point-text">时长:</text>
+          <EditableText value={pathExtra?.duration} onChanged={(lastValue: number, newValue: number) => {
+            if (pathExtra) {
+              pathExtra.duration = newValue;
+              updateSegment(index, {startPoint, endPoint, midPointA, midPointB, pathExtra});
+            }
+          }} />
         </div>
         <div className="points-row">
           <EditableCurveItem value={midPointA} prefix={"A:"} onChanged={(value: Vector3Tuple) => { onChanged({startPoint, endPoint, midPointA: value, midPointB}); }} />
           <div style={{width: "10px"}}/>
           <EditableCurveItem value={midPointB} prefix={"B:"} onChanged={(value: Vector3Tuple) => { onChanged({startPoint, endPoint, midPointA, midPointB: value}); }} />
+          <div style={{width: "10px"}}/>
+          <text className="point-text">是否相对</text>
+          <input type="checkbox" checked={checked} onChange={onCheckChanged} />
         </div>
       </div>
       <view>
@@ -209,7 +233,7 @@ export function CurveList() {
   );
 }
 
-function unsecuredCopyToClipboard(text) {
+function unsecuredCopyToClipboard(text: string) {
   const textArea = document.createElement("textarea");
   textArea.value = text;
   document.body.appendChild(textArea);
