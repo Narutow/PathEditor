@@ -90,4 +90,10 @@ body {
 
 .point-text {
   font-size: 10px;
+  margin: 0 3px;
+}
+
+.point-input {
+  font-size: 10px;
+  width: 20px;
 }

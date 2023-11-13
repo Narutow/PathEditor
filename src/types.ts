@@ -86,7 +86,7 @@ export function smoothControlPoints(
     let next = controlPoints[i+1];
 
     //确保两个控制点相连
-    cur.endPoint = next.startPoint;
+    next.startPoint = cur.endPoint;
 
     if (plan === 1) {
       if (cur.pathExtra?.isRelative !== next.pathExtra?.isRelative) {

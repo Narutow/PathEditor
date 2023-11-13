@@ -1,6 +1,7 @@
-import create from "zustand"
+import create, { useStore } from "zustand"
 import { ControlPoints, generateAbsoluteControlPoints, cloneControlPointsArray, convertRelativeControlPointsArray, removeElement, convertToRelativeControlPoints, smoothControlPoints, convertToRelativeControlPointsArray } from "../types"
 import { Vector3 } from "three"
+import { TemporalState, temporal } from "zundo";
 
 /**
  * 存储贝塞尔曲线的数据,包括基础数据和显示数据.
@@ -44,7 +45,12 @@ interface SegmentsState {
   smoothCurvePaths: (plan: number) => void;
 }
 
-export const useStore = create<SegmentsState>((set) => ({
+export const useTemporalStore = <T,>(
+  selector: (state: TemporalState<SegmentsState>) => T,
+  equality?: (a: T, b: T) => boolean,
+) => useStore(useStoreWithUndo.temporal, selector, equality);
+
+export const useStoreWithUndo = create<SegmentsState>()(temporal((set) => ({
   micseats: [
     new Vector3(0, 3.371443510055542, 0),
     new Vector3(-1.85819673538208, 1.8153927326202393, 0),
@@ -167,5 +173,7 @@ export const useStore = create<SegmentsState>((set) => ({
         segments: newSegments,
         viewSegments: newViewSegments,
       };
-    })
-}))
+    }),
+    
+  })),
+);
