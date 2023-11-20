@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback, Fragment, useEffect } from "react"
-import { TransformControls } from "@react-three/drei"
-import { useThree } from "@react-three/fiber"
-import { Object3D } from "three"
+import { useState, useRef, useCallback, Fragment, useEffect, Suspense } from "react"
+import { TransformControls, useAnimations, useGLTF } from "@react-three/drei"
+import { useFrame, useThree } from "@react-three/fiber"
+import { AnimationMixer, Object3D } from "three"
 import { updateControlLine, updateCurve } from "../utils/helpers"
 import { BezierLineSegment } from "./BezierLineSegment"
 import { ControlPoint } from "./ControlPoint"
@@ -42,7 +42,7 @@ export const BezierCurveEditor = () => {
     return () => {
       document.removeEventListener('keydown', onKeyDown);
     }; 
-  });
+  }, []);
 
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.defaultPrevented) {
@@ -177,9 +177,31 @@ export const BezierCurveEditor = () => {
         ref={testObj}
         position={viewSegments[0] ? [...viewSegments[0].startPoint] : [0, 0, 0]}
       >
-        <sphereBufferGeometry args={[0.5, 32]} />
+        <Suspense fallback={<sphereBufferGeometry args={[0.5, 32]} />}>
+          <GLTFModel url={'/bird3.glb'}/>
+        </Suspense>
         <meshBasicMaterial color="white" />
       </mesh>
     </>
   )
 }
+
+function GLTFModel({ url }) {
+  const { scene, animations } = useGLTF(url) as any;
+  const mixerRef = React.useRef<AnimationMixer>(new AnimationMixer(scene))
+
+  useAnimations(animations, scene)
+
+  React.useEffect(() => {
+    if (animations && animations[0]) {
+      const action = mixerRef.current.clipAction(animations[0])
+      action.play()
+    }
+  }, [animations])
+
+  useFrame((_state, delta) => {
+    mixerRef.current.update(delta)
+  })
+
+  return <primitive object={scene} dispose={null} />;
+} 
