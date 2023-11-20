@@ -9,6 +9,7 @@ import { ControlPointName, ControlPoints } from "../types"
 import { useStoreWithUndo, useTemporalStore } from "../store"
 import { useAnimation } from "./useAnimation"
 import React from "react"
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader"
 
 export const BezierCurveEditor = () => {
   const { scene } = useThree()
@@ -187,7 +188,7 @@ export const BezierCurveEditor = () => {
 }
 
 function GLTFModel({ url }) {
-  const { scene, animations } = useGLTF(url) as any;
+  const { scene, animations } = useGLTF(url) as unknown as GLTF;
   const mixerRef = React.useRef<AnimationMixer>(new AnimationMixer(scene))
 
   useAnimations(animations, scene)
@@ -203,5 +204,10 @@ function GLTFModel({ url }) {
     mixerRef.current.update(delta)
   })
 
-  return <primitive object={scene} dispose={null} />;
+  return (
+    <group>
+      <ambientLight intensity={2} />
+      <primitive object={scene} dispose={null} />
+    </group>
+  );
 } 

@@ -27,7 +27,7 @@ export default function App() {
         }}
       >
         <BezierCurveEditor />
-        <ambientLight intensity={2} />
+        <ambientLight intensity={1} />
         <gridHelper args={[2 * WORLD_WIDTH, 40, "#FFF", "#CCC"]} />
         <OrbitControls makeDefault />
         <SeatSphereContainer />
