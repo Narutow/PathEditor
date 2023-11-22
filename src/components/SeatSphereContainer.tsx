@@ -40,7 +40,7 @@ export default function SeatSphereContainer() {
         position={[0, 0.65, 0]}
       >
         <planeGeometry args={[WORLD_WIDTH, WORLD_WIDTH * BACKGROUND_RATIO]} />
-        <meshStandardMaterial map={texture} side={DoubleSide} opacity={0.5} transparent />
+        <meshStandardMaterial map={texture} side={DoubleSide} opacity={0.4} transparent depthWrite={false} />
       </mesh>
       
       {seatSphere(micseats[0], 0.453218698501587)}

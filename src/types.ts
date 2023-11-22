@@ -96,6 +96,18 @@ export function smoothControlPoints(
       adjustControlPointsForSameAngleAndDistance3D(cur, next);
     }
   }  
+
+  // 匀速代码,先注释
+  // let totalTime = 0;
+  // const v = 8;
+  // controlPoints.forEach((points: ControlPoints) => {
+  //   const time = getBezierCurveLength(points) / v;
+  //   console.log('bztime: ', time);
+  //   points.pathExtra.duration = time;
+  //   totalTime += time;
+  // });
+  // console.log('total time: ', totalTime);
+
   return controlPoints;
 }
 
@@ -249,4 +261,38 @@ function adjustControlPointsForSameAngleAndDistance3D(
     controlPoints2.startPoint[1] - dy * averageDistance,
     controlPoints2.startPoint[2] - dz * averageDistance
   ];
+}
+
+function getBezierCurveLength(
+  { startPoint, endPoint, midPointA, midPointB }: ControlPoints,
+  divisions: number = 10
+): number {
+  let length = 0;
+  let lastPoint = new Vector3().fromArray(startPoint);
+
+  for (let i = 1; i <= divisions; i++) {
+    const t = i / divisions;
+    const point = getBezierCurvePoint(t, startPoint, midPointA, midPointB, endPoint);
+    length += point.distanceTo(lastPoint);
+    lastPoint = point;
+  }
+
+  return length;
+}
+
+function getBezierCurvePoint(
+  t: number,
+  startPoint: Vector3Tuple,
+  midPointA: Vector3Tuple,
+  midPointB: Vector3Tuple,
+  endPoint: Vector3Tuple
+): Vector3 {
+  const invT = 1 - t;
+
+  const a = (new Vector3().fromArray(startPoint)).multiplyScalar(invT * invT * invT);
+  const b = (new Vector3().fromArray(midPointA)).multiplyScalar(3 * invT * invT * t);
+  const c = (new Vector3().fromArray(midPointB)).multiplyScalar(3 * invT * t * t);
+  const d = (new Vector3().fromArray(endPoint)).multiplyScalar(t * t * t);
+
+  return new Vector3().addVectors(a, a.addVectors(b, c.add(d)));
 }

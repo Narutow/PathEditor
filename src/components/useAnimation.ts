@@ -33,6 +33,7 @@ export const useAnimation = (
     timeline.clear()
     viewSegments.forEach((controlPoints) => {
       if (!object.current) return
+      console.log('realtime: ', controlPoints.pathExtra?.duration);
       timeline.to(
         object.current.position,
         {
@@ -55,13 +56,13 @@ export const useAnimation = (
               controlPoints.midPointA,
               controlPoints.midPointB,
               controlPoints.endPoint,
-              Math.min(1, time + 0.01)
+              Math.min(1, time + 0.05)
             );
             object.current.position.copy(curPosition);
             const direction = nextPosition.clone().sub(curPosition);
             if (direction.length() > 0.01) {
                 object.current.lookAt(nextPosition);
-                object.current.up.set(0, 1, 0);
+                object.current.up.set(0, 0, 1);
                 object.current.updateMatrix();
             }
           },

@@ -206,8 +206,7 @@ function GLTFModel({ url }) {
 
   return (
     <group>
-      <ambientLight intensity={2} />
-      <primitive object={scene} dispose={null} />
+      <primitive object={scene} dispose={null} scale={[1, 1, 1]}  />
     </group>
   );
 } 
