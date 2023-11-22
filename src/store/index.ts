@@ -104,7 +104,7 @@ export const useStoreWithUndo = create<SegmentsState>()(temporal((set) => ({
       }
     }),
 
-  relativePointIndex: 3,
+  relativePointIndex: 0,
 
   addRandomSegment: (isRelative: boolean, duration: number) =>
     set((state) => {
